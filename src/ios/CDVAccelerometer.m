@@ -70,14 +70,14 @@
         self.motionManager = [[CMMotionManager alloc] init];
     }
 
-    if ([self.motionManager isAccelerometerAvailable] == YES) {
+    if ([self.motionManager isDeviceMotionAvailable] == YES) {
         // Assign the update interval to the motion manager and start updates
         [self.motionManager setAccelerometerUpdateInterval:kAccelerometerInterval/1000];  // expected in seconds
         __weak CDVAccelerometer* weakSelf = self;
-        [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
-            weakSelf.x = accelerometerData.acceleration.x;
-            weakSelf.y = accelerometerData.acceleration.y;
-            weakSelf.z = accelerometerData.acceleration.z;
+        [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *data, NSError *error) {
+            weakSelf.x = data.userAcceleration.x;
+            weakSelf.y = data.userAcceleration.y;
+            weakSelf.z = data.userAcceleration.z;
             weakSelf.timestamp = ([[NSDate date] timeIntervalSince1970] * 1000);
             [weakSelf returnAccelInfo];
         }];
@@ -90,10 +90,10 @@
 
         NSLog(@"Running in Simulator? All gyro tests will fail.");
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_INVALID_ACTION messageAsString:@"Error. Accelerometer Not Available."];
-        
+
         [self.commandDelegate sendPluginResult:result callbackId:self.callbackId];
     }
-    
+
 }
 
 - (void)onReset
@@ -103,7 +103,7 @@
 
 - (void)stop:(CDVInvokedUrlCommand*)command
 {
-    if ([self.motionManager isAccelerometerAvailable] == YES) {
+    if ([self.motionManager isDeviceMotionAvailable] == YES) {
         if (self.haveReturnedResult == NO){
             // block has not fired before stop was called, return whatever result we currently have
             [self returnAccelInfo];
